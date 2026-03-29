@@ -6,6 +6,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.thienpm.askify.api.config.JwtProperties;
+import com.thienpm.askify.api.dto.request.LoginRequestDTO;
 import com.thienpm.askify.api.dto.request.RegisterRequestDTO;
 import com.thienpm.askify.api.dto.response.AuthResponse;
 import com.thienpm.askify.api.dto.response.AuthResult;
@@ -20,6 +22,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class AuthController {
     private final AuthService authService;
+    private final JwtProperties jwtProperties;
 
     @PostMapping("/register")
     public ResponseEntity<AuthResponse> register(
@@ -35,11 +38,25 @@ public class AuthController {
                 .build());
     }
 
+    @PostMapping("/login")
+    public ResponseEntity<AuthResponse> login(
+            @RequestBody @Valid LoginRequestDTO request,
+            HttpServletResponse response) {
+
+        AuthResult authResult = authService.login(request);
+
+        addRefreshTokenCookie(response, authResult.getRefreshToken());
+
+        return ResponseEntity.ok(AuthResponse.builder()
+                .accessToken(authResult.getAccessToken())
+                .build());
+    }
+
     private void addRefreshTokenCookie(HttpServletResponse response, String refreshToken) {
         String cookie = String.format(
-                "refreshToken=%s; HttpOnly; Secure; SameSite=Strict; Path=/api/auth/refresh; Max-Age=%d",
+                "refreshToken=%s; HttpOnly; Secure; SameSite=Strict; Path=/auth/refresh; Max-Age=%d",
                 refreshToken,
-                7 * 24 * 60 * 60);
+                jwtProperties.getRefreshTokenExpiration());
         response.addHeader("Set-Cookie", cookie);
     }
 }

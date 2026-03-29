@@ -9,7 +9,7 @@ public enum ErrorCode {
     // User
     USER_NOT_FOUND("User not found", 404),
     EMAIL_ALREADY_EXISTS("Email already exists", 409),
-
+    INVALID_CREDENTIALS("Email or password is incorrect", 401),
     // Common
     VALIDATION_FAILED("Validation failed", 400),
     INTERNAL_SERVER_ERROR("Internal server error", 500);
