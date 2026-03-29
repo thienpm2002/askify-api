@@ -15,8 +15,8 @@ import lombok.RequiredArgsConstructor;
 public class CustomUserDetails implements UserDetails {
     private final User user;
 
-    public User getUser() {
-        return user;
+    public Integer getId() {
+        return user.getId();
     }
 
     @Override
