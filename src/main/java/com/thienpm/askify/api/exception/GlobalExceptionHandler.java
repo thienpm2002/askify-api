@@ -3,6 +3,7 @@ package com.thienpm.askify.api.exception;
 import java.util.stream.Collectors;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.validation.FieldError;
@@ -23,6 +24,14 @@ public class GlobalExceptionHandler {
     // Resource not found
     @ExceptionHandler(NoResourceFoundException.class)
     public ResponseEntity<ErrorResponse> handleNotFound(NoResourceFoundException e) {
+        return ResponseEntity
+                .status(404)
+                .body(ErrorResponse.of(ErrorCode.NOT_FOUND));
+    }
+
+    // Http method sai
+    @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
+    public ResponseEntity<ErrorResponse> handleMethodNotAllowed(HttpRequestMethodNotSupportedException e) {
         return ResponseEntity
                 .status(404)
                 .body(ErrorResponse.of(ErrorCode.NOT_FOUND));
