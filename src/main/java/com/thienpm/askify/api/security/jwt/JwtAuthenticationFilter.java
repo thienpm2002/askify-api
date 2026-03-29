@@ -10,6 +10,8 @@ import org.springframework.security.web.authentication.WebAuthenticationDetailsS
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
+import com.thienpm.askify.api.dto.response.ErrorResponse;
+import com.thienpm.askify.api.enums.ErrorCode;
 import com.thienpm.askify.api.security.user.CustomUserDetailsService;
 
 import io.jsonwebtoken.ExpiredJwtException;
@@ -19,6 +21,7 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import tools.jackson.databind.ObjectMapper;
 
 @Component
 @RequiredArgsConstructor
@@ -69,22 +72,21 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         } catch (ExpiredJwtException e) {
             SecurityContextHolder.clearContext();
-            sendError(response, "TOKEN_EXPIRED", e.getMessage());
+            sendError(response, ErrorCode.TOKEN_EXPIRED);
             return;
         } catch (JwtException | UsernameNotFoundException e) {
             SecurityContextHolder.clearContext();
-            sendError(response, "INVALID_TOKEN", e.getMessage());
+            sendError(response, ErrorCode.INVALID_TOKEN);
             return;
         }
 
         filterChain.doFilter(request, response);
     }
 
-    private void sendError(HttpServletResponse response, String error, String message) throws IOException {
-        response.setStatus(HttpServletResponse.SC_UNAUTHORIZED); // 401
+    private void sendError(HttpServletResponse response, ErrorCode errorCode) throws IOException {
+        response.setStatus(errorCode.getHttpStatus());
         response.setContentType("application/json");
-        response.getWriter().write(
-                "{\"error\": \"" + error + "\", \"message\": \"" + message + "\"}");
+        new ObjectMapper().writeValue(response.getWriter(), ErrorResponse.of(errorCode));
     }
 
 }
