@@ -9,6 +9,7 @@ import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 import com.thienpm.askify.api.dto.response.ErrorResponse;
 import com.thienpm.askify.api.enums.ErrorCode;
@@ -18,6 +19,14 @@ import io.jsonwebtoken.JwtException;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
+
+    // Resource not found
+    @ExceptionHandler(NoResourceFoundException.class)
+    public ResponseEntity<ErrorResponse> handleNotFound(NoResourceFoundException e) {
+        return ResponseEntity
+                .status(404)
+                .body(ErrorResponse.of(ErrorCode.NOT_FOUND));
+    }
 
     // Exception Valid Request
     @ExceptionHandler(MethodArgumentNotValidException.class)

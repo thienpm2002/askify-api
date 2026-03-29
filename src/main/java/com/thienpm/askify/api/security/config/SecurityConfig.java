@@ -41,7 +41,9 @@ public class SecurityConfig {
                                 // 3. Quy định quyền truy cập từng endpoint
                                 .authorizeHttpRequests(auth -> auth
                                                 // Cho phép tất cả gọi các endpoint auth
-                                                .requestMatchers("/auth/**").permitAll()
+                                                .requestMatchers("/auth/register", "/auth/login",
+                                                                "/auth/refresh")
+                                                .permitAll()
                                                 // Chỉ ADMIN mới vào được /api/admin/**
                                                 .requestMatchers("/admin/**").hasRole("ADMIN")
                                                 // Tất cả còn lại phải đăng nhập

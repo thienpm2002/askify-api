@@ -6,11 +6,13 @@ public enum ErrorCode {
     INVALID_TOKEN("Invalid token", 401),
     UNAUTHORIZED("Unauthorized", 401),
     FORBIDDEN("Access denied", 403),
+
     // User
-    USER_NOT_FOUND("User not found", 404),
     EMAIL_ALREADY_EXISTS("Email already exists", 409),
     INVALID_CREDENTIALS("Email or password is incorrect", 401),
+
     // Common
+    NOT_FOUND("Resource not found", 404),
     VALIDATION_FAILED("Validation failed", 400),
     INTERNAL_SERVER_ERROR("Internal server error", 500);
 
