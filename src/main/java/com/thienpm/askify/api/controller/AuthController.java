@@ -1,6 +1,7 @@
 package com.thienpm.askify.api.controller;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -77,6 +78,18 @@ public class AuthController {
         return ResponseEntity.ok(AuthResponse.builder()
                 .accessToken(authResult.getAccessToken())
                 .build());
+    }
+
+    @PostMapping("/logout")
+    public ResponseEntity<Void> logout(HttpServletResponse response) {
+        // Xóa refresh token cookie bằng cách set Max-Age = 0
+        String cookie = "refreshToken=; HttpOnly; Secure; SameSite=Strict; Path=/auth/refresh; Max-Age=0";
+        response.addHeader("Set-Cookie", cookie);
+
+        // Clear SecurityContext
+        SecurityContextHolder.clearContext();
+
+        return ResponseEntity.noContent().build();
     }
 
     private void addRefreshTokenCookie(HttpServletResponse response, String refreshToken) {
