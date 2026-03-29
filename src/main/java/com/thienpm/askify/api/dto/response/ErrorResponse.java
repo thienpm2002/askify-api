@@ -24,4 +24,13 @@ public class ErrorResponse {
                 .build();
     }
 
+    public static ErrorResponse of(ErrorCode errorCode, String message) {
+        return ErrorResponse.builder()
+                .error(errorCode.name())
+                .message(message)
+                .status(errorCode.getHttpStatus())
+                .timestamp(LocalDateTime.now())
+                .build();
+    }
+
 }
