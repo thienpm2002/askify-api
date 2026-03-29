@@ -19,35 +19,35 @@ import lombok.RequiredArgsConstructor;
 @Service
 @RequiredArgsConstructor
 public class AuthServiceImpl implements AuthService {
-    private final UserRepository userRepository;
-    private final PasswordEncoder passwordEncoder;
-    private final JwtService jwtService;
+        private final UserRepository userRepository;
+        private final PasswordEncoder passwordEncoder;
+        private final JwtService jwtService;
 
-    @Override
-    public AuthResult register(RegisterRequestDTO registerRequest) {
-        String email = registerRequest.getEmail();
+        @Override
+        public AuthResult register(RegisterRequestDTO registerRequest) {
+                String email = registerRequest.getEmail();
 
-        if (userRepository.existsByEmail(email)) {
-            throw new AppException(ErrorCode.EMAIL_ALREADY_EXISTS);
+                if (userRepository.existsByEmail(email)) {
+                        throw new AppException(ErrorCode.EMAIL_ALREADY_EXISTS);
+                }
+
+                User user = User.builder()
+                                .email(email)
+                                .password(passwordEncoder.encode(registerRequest.getPassword()))
+                                .userName(registerRequest.getUserName())
+                                .role(Role.USER)
+                                .build();
+
+                userRepository.save(user);
+
+                UserDetails userDetails = new CustomUserDetails(user);
+
+                return AuthResult.builder()
+                                .accessToken(jwtService.generateAccessToken(
+                                                userDetails))
+                                .refreshToken(jwtService.generateRefreshToken(
+                                                userDetails))
+                                .build();
         }
-
-        User user = User.builder()
-                .email(registerRequest.getEmail())
-                .password(passwordEncoder.encode(registerRequest.getPassword()))
-                .userName(registerRequest.getUserName())
-                .role(Role.USER)
-                .build();
-
-        userRepository.save(user);
-
-        UserDetails userDetails = new CustomUserDetails(user);
-
-        return AuthResult.builder()
-                .accessToken(jwtService.generateAccessToken(
-                        userDetails))
-                .refreshToken(jwtService.generateAccessToken(
-                        userDetails))
-                .build();
-    }
 
 }
