@@ -5,6 +5,7 @@ public enum ErrorCode {
     TOKEN_EXPIRED("Token has expired", 401),
     INVALID_TOKEN("Invalid token", 401),
     UNAUTHORIZED("Unauthorized", 401),
+    FORBIDDEN("Forbidden", 403),
     // User
     USER_NOT_FOUND("User not found", 404),
     EMAIL_ALREADY_EXISTS("Email already exists", 409),
