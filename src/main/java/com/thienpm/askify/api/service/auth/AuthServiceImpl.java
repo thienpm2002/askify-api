@@ -17,6 +17,7 @@ import com.thienpm.askify.api.exception.AppException;
 import com.thienpm.askify.api.repository.UserRepository;
 import com.thienpm.askify.api.security.jwt.JwtService;
 import com.thienpm.askify.api.security.user.CustomUserDetails;
+import com.thienpm.askify.api.security.user.CustomUserDetailsService;
 
 import lombok.RequiredArgsConstructor;
 
@@ -27,6 +28,7 @@ public class AuthServiceImpl implements AuthService {
         private final PasswordEncoder passwordEncoder;
         private final JwtService jwtService;
         private final AuthenticationManager authenticationManager;
+        private final CustomUserDetailsService userDetailsService;
 
         @Override
         public AuthResult register(RegisterRequestDTO registerRequest) {
@@ -68,6 +70,22 @@ public class AuthServiceImpl implements AuthService {
                                 .refreshToken(jwtService.generateRefreshToken(
                                                 userDetails))
                                 .build();
+        }
+
+        @Override
+        public AuthResult refreshToken(String refreshToken) {
+                // Extract userId từ refresh token
+                Integer userId = jwtService.extractUserId(refreshToken);
+
+                // Load user
+                UserDetails userDetails = userDetailsService.loadUserById(userId);
+
+                // Generate cả 2 token mới (refresh token rotation)
+                return AuthResult.builder()
+                                .accessToken(jwtService.generateAccessToken(userDetails))
+                                .refreshToken(jwtService.generateRefreshToken(userDetails))
+                                .build();
+
         }
 
 }

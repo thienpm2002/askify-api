@@ -8,4 +8,6 @@ public interface AuthService {
     AuthResult register(RegisterRequestDTO registerRequest);
 
     AuthResult login(LoginRequestDTO loginRequest);
+
+    AuthResult refreshToken(String refreshToken);
 }
