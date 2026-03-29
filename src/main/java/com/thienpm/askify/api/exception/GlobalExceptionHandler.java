@@ -4,6 +4,7 @@ import java.util.stream.Collectors;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -12,9 +13,13 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import com.thienpm.askify.api.dto.response.ErrorResponse;
 import com.thienpm.askify.api.enums.ErrorCode;
 
+import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.JwtException;
+
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
+    // Exception Valid Request
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ErrorResponse> handleValidation(MethodArgumentNotValidException e) {
         String message = e.getBindingResult()
@@ -38,12 +43,36 @@ public class GlobalExceptionHandler {
                 .body(errorResponse);
     }
 
-    //
+    // Exception Login(email, password)
     @ExceptionHandler(BadCredentialsException.class)
     public ResponseEntity<ErrorResponse> handleBadCredentials(BadCredentialsException e) {
         return ResponseEntity
                 .status(401)
                 .body(ErrorResponse.of(ErrorCode.INVALID_CREDENTIALS));
+    }
+
+    // loadUserById không tìm thấy user
+    @ExceptionHandler(UsernameNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handleUsernameNotFound(UsernameNotFoundException e) {
+        return ResponseEntity
+                .status(401)
+                .body(ErrorResponse.of(ErrorCode.INVALID_TOKEN));
+    }
+
+    // Refresh token hết hạn — phải trước JwtException!
+    @ExceptionHandler(ExpiredJwtException.class)
+    public ResponseEntity<ErrorResponse> handleExpiredJwt(ExpiredJwtException e) {
+        return ResponseEntity
+                .status(401)
+                .body(ErrorResponse.of(ErrorCode.TOKEN_EXPIRED));
+    }
+
+    // Token sai format, sai chữ ký...
+    @ExceptionHandler(JwtException.class)
+    public ResponseEntity<ErrorResponse> handleJwt(JwtException e) {
+        return ResponseEntity
+                .status(401)
+                .body(ErrorResponse.of(ErrorCode.INVALID_TOKEN));
     }
 
     // Exception chung

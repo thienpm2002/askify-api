@@ -11,8 +11,12 @@ import com.thienpm.askify.api.dto.request.LoginRequestDTO;
 import com.thienpm.askify.api.dto.request.RegisterRequestDTO;
 import com.thienpm.askify.api.dto.response.AuthResponse;
 import com.thienpm.askify.api.dto.response.AuthResult;
+import com.thienpm.askify.api.enums.ErrorCode;
+import com.thienpm.askify.api.exception.AppException;
 import com.thienpm.askify.api.service.auth.AuthService;
 
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -52,11 +56,46 @@ public class AuthController {
                 .build());
     }
 
+    @PostMapping("/refresh")
+    public ResponseEntity<AuthResponse> refresh(
+            HttpServletRequest request,
+            HttpServletResponse response) {
+
+        // Đọc refresh token từ cookie
+        String refreshToken = extractRefreshTokenFromCookie(request);
+
+        if (refreshToken == null) {
+            throw new AppException(ErrorCode.INVALID_TOKEN);
+        }
+
+        // Validate + generate token mới → để AuthService xử lý
+        AuthResult authResult = authService.refreshToken(refreshToken);
+
+        // Set refresh token mới vào cookie (rotation)
+        addRefreshTokenCookie(response, authResult.getRefreshToken());
+
+        return ResponseEntity.ok(AuthResponse.builder()
+                .accessToken(authResult.getAccessToken())
+                .build());
+    }
+
     private void addRefreshTokenCookie(HttpServletResponse response, String refreshToken) {
         String cookie = String.format(
                 "refreshToken=%s; HttpOnly; Secure; SameSite=Strict; Path=/auth/refresh; Max-Age=%d",
                 refreshToken,
                 jwtProperties.getRefreshTokenExpiration());
         response.addHeader("Set-Cookie", cookie);
+    }
+
+    private String extractRefreshTokenFromCookie(HttpServletRequest request) {
+        if (request.getCookies() == null)
+            return null;
+
+        for (Cookie cookie : request.getCookies()) {
+            if ("refreshToken".equals(cookie.getName())) {
+                return cookie.getValue();
+            }
+        }
+        return null;
     }
 }
