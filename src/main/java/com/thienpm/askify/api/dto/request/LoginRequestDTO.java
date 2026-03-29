@@ -8,9 +8,9 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Getter
-@AllArgsConstructor
 @NoArgsConstructor
-public class RegisterRequestDTO {
+@AllArgsConstructor
+public class LoginRequestDTO {
     @NotBlank(message = "Email is required")
     @Email(message = "Invalid email format")
     private String email;
@@ -18,7 +18,4 @@ public class RegisterRequestDTO {
     @NotBlank(message = "Password is required")
     @Size(min = 8, message = "Password must be at least 8 characters")
     private String password;
-
-    @NotBlank(message = "Username is required")
-    private String userName;
 }
