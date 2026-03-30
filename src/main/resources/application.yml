@@ -22,3 +22,9 @@ server:
   port: 8080
   servlet:
     context-path: /api
+
+app:
+  upload:
+    dir: uploads/avatars # Thư mục lưu trữ
+    max-size: 2097152 # 2MB in bytes
+    allowed-types: image/jpeg,image/png,image/webp

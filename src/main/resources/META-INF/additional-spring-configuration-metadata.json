@@ -14,6 +14,18 @@
       "name": "app.jwt.refresh-token-expiration",
       "type": "java.lang.Long",
       "description": "Refresh token expiration"
+    },
+    {
+      "name": "app.upload.dir",
+      "type": "java.lang.String"
+    },
+    {
+      "name": "app.upload.max-size",
+      "type": "java.lang.Long"
+    },
+    {
+      "name": "app.upload.allowed-types",
+      "type": "java.util.List"
     }
   ]
 }
