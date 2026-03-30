@@ -4,7 +4,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.thienpm.askify.api.dto.request.UpdateProfileRequest;
-import com.thienpm.askify.api.dto.response.UserProfile;
+import com.thienpm.askify.api.dto.response.UserProfileResponse;
 import com.thienpm.askify.api.security.user.CustomUserDetails;
 import com.thienpm.askify.api.service.user.UserService;
 
@@ -24,12 +24,13 @@ public class UserController {
     private final UserService userService;
 
     @GetMapping("/me")
-    public ResponseEntity<UserProfile> getProfile(@AuthenticationPrincipal CustomUserDetails userDetails) {
+    public ResponseEntity<UserProfileResponse> getProfile(@AuthenticationPrincipal CustomUserDetails userDetails) {
         return ResponseEntity.ok(userService.getProfile(userDetails));
     }
 
     @PatchMapping("/me")
-    public ResponseEntity<UserProfile> updateProfile(@RequestBody @Valid UpdateProfileRequest updateProfileRequest,
+    public ResponseEntity<UserProfileResponse> updateProfile(
+            @RequestBody @Valid UpdateProfileRequest updateProfileRequest,
             @AuthenticationPrincipal CustomUserDetails userDetails) {
         return ResponseEntity.ok(userService.updateProfile(updateProfileRequest, userDetails));
     }
