@@ -34,7 +34,7 @@ public class JwtService {
         extraClaims.put("roles", userDetails.getAuthorities().stream()
                 .map(GrantedAuthority::getAuthority).toList());
 
-        String userId = ((CustomUserDetails) userDetails).getId().toString();
+        String userId = ((CustomUserDetails) userDetails).getUser().getId().toString();
 
         return Jwts.builder()
                 .subject(userId) // sub claims: userId
@@ -67,7 +67,7 @@ public class JwtService {
     public boolean isTokenValid(String token, UserDetails userDetails) {
         Claims claims = getClaims(token);
 
-        String userId = ((CustomUserDetails) userDetails).getId().toString();
+        String userId = ((CustomUserDetails) userDetails).getUser().getId().toString();
 
         return claims.getSubject().equals(userId)
                 && !claims.getExpiration().before(new Date());
