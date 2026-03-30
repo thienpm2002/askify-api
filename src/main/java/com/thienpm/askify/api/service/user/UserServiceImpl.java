@@ -1,6 +1,7 @@
 package com.thienpm.askify.api.service.user;
 
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.thienpm.askify.api.dto.request.UpdateProfileRequest;
 import com.thienpm.askify.api.dto.response.UserProfileResponse;
@@ -16,6 +17,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
+    private final FileStorageService fileStorageService;
 
     @Override
     public UserProfileResponse getProfile(CustomUserDetails userDetails) {
@@ -38,6 +40,25 @@ public class UserServiceImpl implements UserService {
             user.setUserName(newUserName);
             userRepository.save(user);
         }
+
+        return UserProfileResponse.builder()
+                .id(user.getId())
+                .userName(user.getUserName())
+                .email(user.getEmail())
+                .avatarUrl(user.getAvatarUrl())
+                .build();
+    }
+
+    @Override
+    public UserProfileResponse updateAvatar(MultipartFile avatarFile, CustomUserDetails userDetails) {
+
+        Integer id = userDetails.getUser().getId();
+        User user = userRepository.findById(id).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
+
+        String newAvatarUrl = fileStorageService.saveAvatar(avatarFile, id);
+
+        user.setAvatarUrl(newAvatarUrl);
+        userRepository.save(user);
 
         return UserProfileResponse.builder()
                 .id(user.getId())

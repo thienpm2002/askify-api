@@ -12,6 +12,12 @@ public enum ErrorCode {
     INVALID_CREDENTIALS("Email or password is incorrect", 401),
     USER_NOT_FOUND("User not found", 404),
 
+    // File
+    FILE_EMPTY("File is empty", 400),
+    INVALID_FILE_TYPE("Only JPEG, PNG, WEBP are allowed", 400),
+    FILE_TOO_LARGE("File size must be less than 2MB", 400),
+    FILE_UPLOAD_FAILED("Failed to upload file", 500),
+
     // Common
     NOT_FOUND("Resource not found", 404),
     VALIDATION_FAILED("Validation failed", 400),

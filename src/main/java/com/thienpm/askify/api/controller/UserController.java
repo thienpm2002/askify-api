@@ -1,7 +1,9 @@
 package com.thienpm.askify.api.controller;
 
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.thienpm.askify.api.dto.request.UpdateProfileRequest;
 import com.thienpm.askify.api.dto.response.UserProfileResponse;
@@ -33,5 +35,12 @@ public class UserController {
             @RequestBody @Valid UpdateProfileRequest updateProfileRequest,
             @AuthenticationPrincipal CustomUserDetails userDetails) {
         return ResponseEntity.ok(userService.updateProfile(updateProfileRequest, userDetails));
+    }
+
+    @PatchMapping("/me/avatar")
+    public ResponseEntity<UserProfileResponse> updateAvatar(
+            @RequestParam("avatar") MultipartFile avatarFile,
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
+        return ResponseEntity.ok(userService.updateAvatar(avatarFile, userDetails));
     }
 }
