@@ -3,7 +3,7 @@ package com.thienpm.askify.api.service.user;
 import org.springframework.stereotype.Service;
 
 import com.thienpm.askify.api.dto.request.UpdateProfileRequest;
-import com.thienpm.askify.api.dto.response.UserProfile;
+import com.thienpm.askify.api.dto.response.UserProfileResponse;
 import com.thienpm.askify.api.entity.User;
 import com.thienpm.askify.api.enums.ErrorCode;
 import com.thienpm.askify.api.exception.AppException;
@@ -18,9 +18,9 @@ public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
 
     @Override
-    public UserProfile getProfile(CustomUserDetails userDetails) {
+    public UserProfileResponse getProfile(CustomUserDetails userDetails) {
 
-        return UserProfile.builder()
+        return UserProfileResponse.builder()
                 .id(userDetails.getUser().getId())
                 .userName(userDetails.getUser().getUserName())
                 .email(userDetails.getUser().getEmail())
@@ -29,7 +29,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public UserProfile updateProfile(UpdateProfileRequest updateProfileRequest, CustomUserDetails userDetails) {
+    public UserProfileResponse updateProfile(UpdateProfileRequest updateProfileRequest, CustomUserDetails userDetails) {
         User user = userRepository.findById(userDetails.getUser().getId())
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
 
@@ -39,7 +39,7 @@ public class UserServiceImpl implements UserService {
             userRepository.save(user);
         }
 
-        return UserProfile.builder()
+        return UserProfileResponse.builder()
                 .id(user.getId())
                 .userName(user.getUserName())
                 .email(user.getEmail())
