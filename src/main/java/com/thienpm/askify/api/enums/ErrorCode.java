@@ -10,6 +10,7 @@ public enum ErrorCode {
     // User
     EMAIL_ALREADY_EXISTS("Email already exists", 409),
     INVALID_CREDENTIALS("Email or password is incorrect", 401),
+    USER_NOT_FOUND("User not found", 404),
 
     // Common
     NOT_FOUND("Resource not found", 404),
