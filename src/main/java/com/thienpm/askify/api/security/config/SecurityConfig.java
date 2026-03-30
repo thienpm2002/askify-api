@@ -44,8 +44,12 @@ public class SecurityConfig {
                                                 .requestMatchers("/auth/register", "/auth/login",
                                                                 "/auth/refresh")
                                                 .permitAll()
+
+                                                .requestMatchers("/avatars/**").permitAll()
+
                                                 // Chỉ ADMIN mới vào được /api/admin/**
                                                 .requestMatchers("/admin/**").hasRole("ADMIN")
+
                                                 // Tất cả còn lại phải đăng nhập
                                                 .anyRequest().authenticated())
 
