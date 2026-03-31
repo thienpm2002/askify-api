@@ -16,6 +16,8 @@ import com.thienpm.askify.api.service.question.QuestionService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 
 @RestController
 @RequestMapping("/questions")
@@ -29,6 +31,11 @@ public class Questioncontroller {
         QuestionResponse response = questionService.createQuestion(questionRequest, userDetails);
         URI location = URI.create("/questions/" + response.getId());
         return ResponseEntity.created(location).body(response);
+    }
+
+    @GetMapping("/{questionId}")
+    public ResponseEntity<QuestionResponse> getQuestionById(@PathVariable Integer questionId) {
+        return ResponseEntity.ok(questionService.getQuestionById(questionId));
     }
 
 }

@@ -18,6 +18,9 @@ public enum ErrorCode {
     FILE_TOO_LARGE("File size must be less than 2MB", 400),
     FILE_UPLOAD_FAILED("Failed to upload file", 500),
 
+    // Question
+    QUESTION_NOT_FOUND("Question not found", 404),
+
     // Common
     NOT_FOUND("Resource not found", 404),
     VALIDATION_FAILED("Validation failed", 400),
