@@ -45,9 +45,10 @@ public class User {
     @Column(name = "avatar_url")
     private String avatarUrl;
 
+    @Builder.Default
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
-    private Role role;
+    private Role role = Role.USER;
 
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
