@@ -8,6 +8,8 @@ import com.thienpm.askify.api.dto.request.CreateQuestionRequest;
 import com.thienpm.askify.api.dto.response.QuestionResponse;
 import com.thienpm.askify.api.entity.Question;
 import com.thienpm.askify.api.entity.Tag;
+import com.thienpm.askify.api.enums.ErrorCode;
+import com.thienpm.askify.api.exception.AppException;
 import com.thienpm.askify.api.mapper.QuestionMapper;
 import com.thienpm.askify.api.repository.QuestionRepository;
 import com.thienpm.askify.api.repository.TagRepository;
@@ -42,6 +44,14 @@ public class QuestionServiceImpl implements QuestionService {
         questionRepository.save(question);
 
         // Mapper -> Response
+        return questionMapper.toResponse(question);
+    }
+
+    @Override
+    public QuestionResponse getQuestionById(Integer questionId) {
+        Question question = questionRepository.findById(questionId)
+                .orElseThrow(() -> new AppException(ErrorCode.QUESTION_NOT_FOUND));
+
         return questionMapper.toResponse(question);
     }
 

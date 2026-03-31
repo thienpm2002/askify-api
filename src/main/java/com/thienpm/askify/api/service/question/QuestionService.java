@@ -6,4 +6,6 @@ import com.thienpm.askify.api.security.user.CustomUserDetails;
 
 public interface QuestionService {
     QuestionResponse createQuestion(CreateQuestionRequest questionRequest, CustomUserDetails userDetails);
+
+    QuestionResponse getQuestionById(Integer questionId);
 }
