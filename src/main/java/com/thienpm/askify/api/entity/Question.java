@@ -38,8 +38,9 @@ public class Question {
     @Column(nullable = false, columnDefinition = "TEXT")
     private String content;
 
+    @Builder.Default
     @Column(name = "vote_count", nullable = false)
-    private Integer voteCount;
+    private Integer voteCount = 0;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
