@@ -12,7 +12,6 @@ import com.thienpm.askify.api.dto.request.RegisterRequestDTO;
 import com.thienpm.askify.api.dto.response.AuthResult;
 import com.thienpm.askify.api.entity.User;
 import com.thienpm.askify.api.enums.ErrorCode;
-import com.thienpm.askify.api.enums.Role;
 import com.thienpm.askify.api.exception.AppException;
 import com.thienpm.askify.api.repository.UserRepository;
 import com.thienpm.askify.api.security.jwt.JwtService;
@@ -42,7 +41,6 @@ public class AuthServiceImpl implements AuthService {
                                 .email(email)
                                 .password(passwordEncoder.encode(registerRequest.getPassword()))
                                 .userName(registerRequest.getUserName())
-                                .role(Role.USER)
                                 .build();
 
                 userRepository.save(user);
