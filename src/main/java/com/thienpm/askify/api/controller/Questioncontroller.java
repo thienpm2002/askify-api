@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.thienpm.askify.api.dto.request.CreateQuestionRequest;
+import com.thienpm.askify.api.dto.request.UpdateQuestionRequest;
 import com.thienpm.askify.api.dto.response.QuestionResponse;
 import com.thienpm.askify.api.security.user.CustomUserDetails;
 import com.thienpm.askify.api.service.question.QuestionService;
@@ -16,6 +17,7 @@ import com.thienpm.askify.api.service.question.QuestionService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 
@@ -36,6 +38,13 @@ public class Questioncontroller {
     @GetMapping("/{questionId}")
     public ResponseEntity<QuestionResponse> getQuestionById(@PathVariable Integer questionId) {
         return ResponseEntity.ok(questionService.getQuestionById(questionId));
+    }
+
+    @PutMapping("/{questionId}")
+    public ResponseEntity<QuestionResponse> updateQuestionById(@PathVariable Integer questionId,
+            @RequestBody @Valid UpdateQuestionRequest questionRequest,
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
+        return ResponseEntity.ok(questionService.updateQuestion(questionId, questionRequest, userDetails));
     }
 
 }
