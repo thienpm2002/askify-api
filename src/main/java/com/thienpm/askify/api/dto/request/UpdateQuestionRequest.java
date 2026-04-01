@@ -10,10 +10,9 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Getter
-@NoArgsConstructor
 @AllArgsConstructor
-public class CreateQuestionRequest {
-
+@NoArgsConstructor
+public class UpdateQuestionRequest {
     @NotBlank(message = "Title is required")
     @Size(max = 255)
     private String title;
@@ -24,5 +23,4 @@ public class CreateQuestionRequest {
     @NotNull(message = "Tags is required")
     @Size(min = 1, max = 5, message = "Tags must be between 1 and 5")
     private List<String> tags;
-
 }
