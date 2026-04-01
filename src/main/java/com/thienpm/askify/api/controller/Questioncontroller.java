@@ -18,6 +18,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 
@@ -45,6 +46,14 @@ public class Questioncontroller {
             @RequestBody @Valid UpdateQuestionRequest questionRequest,
             @AuthenticationPrincipal CustomUserDetails userDetails) {
         return ResponseEntity.ok(questionService.updateQuestion(questionId, questionRequest, userDetails));
+    }
+
+    @DeleteMapping("/{questionId}")
+    public ResponseEntity<?> deleteQuestionById(@PathVariable Integer questionId,
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
+
+        questionService.deleteQuestion(questionId, userDetails);
+        return ResponseEntity.noContent().build();
     }
 
 }

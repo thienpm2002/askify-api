@@ -12,4 +12,6 @@ public interface QuestionService {
 
     QuestionResponse updateQuestion(Integer questionId, UpdateQuestionRequest questionRequest,
             CustomUserDetails userDetails);
+
+    void deleteQuestion(Integer questionId, CustomUserDetails userDetails);
 }

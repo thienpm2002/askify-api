@@ -30,12 +30,7 @@ public class QuestionServiceImpl implements QuestionService {
     @Override
     public QuestionResponse createQuestion(CreateQuestionRequest questionRequest, CustomUserDetails userDetails) {
         // Xu ly tags
-        List<Tag> tags = questionRequest.getTags().stream().map(tag -> {
-            String tagName = tag.toLowerCase().trim().replaceAll("\\s+", "-");
-            return tagRepository.findByName(tagName)
-                    .orElseGet(() -> tagRepository.save(Tag.builder().name(tagName).build()));
-        }).collect(Collectors.toList());
-
+        List<Tag> tags = processTags(questionRequest.getTags());
         // Tao question
         Question question = Question.builder()
                 .title(questionRequest.getTitle())
@@ -66,16 +61,12 @@ public class QuestionServiceImpl implements QuestionService {
         Question question = questionRepository.findById(questionId)
                 .orElseThrow(() -> new AppException(ErrorCode.QUESTION_NOT_FOUND));
         // Kiem tra user
-        if (!question.getUser().getId().equals(userDetails.getUser().getId())) {
+        if (!isOwner(question.getUser().getId(), userDetails)) {
             throw new AppException(ErrorCode.FORBIDDEN);
         }
 
         // Xử lý tags
-        List<Tag> tags = questionRequest.getTags().stream().map(tag -> {
-            String tagName = tag.toLowerCase().trim().replaceAll("\\s+", "-");
-            return tagRepository.findByName(tagName)
-                    .orElseGet(() -> tagRepository.save(Tag.builder().name(tagName).build()));
-        }).collect(Collectors.toList());
+        List<Tag> tags = processTags(questionRequest.getTags());
 
         // update
         question.setTags(tags);
@@ -86,4 +77,39 @@ public class QuestionServiceImpl implements QuestionService {
         return questionMapper.toResponse(question);
     }
 
+    @Transactional
+    @Override
+    public void deleteQuestion(Integer questionId, CustomUserDetails userDetails) {
+        // Kiem tra question
+        Question question = questionRepository.findById(questionId)
+                .orElseThrow(() -> new AppException(ErrorCode.QUESTION_NOT_FOUND));
+        // Kiem tra quyen
+        if (!isOwner(question.getUser().getId(), userDetails) && !isAdmin(userDetails)) {
+            throw new AppException(ErrorCode.FORBIDDEN);
+        }
+
+        questionRepository.delete(question);
+
+    }
+
+    private boolean isAdmin(CustomUserDetails userDetails) {
+        return userDetails.getAuthorities().stream()
+                .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
+    }
+
+    private boolean isOwner(Integer userId, CustomUserDetails userDetails) {
+        return userId.equals(userDetails.getUser().getId());
+    }
+
+    private String normalized(String tag) {
+        return tag.toLowerCase().trim().replaceAll("\\s+", "-");
+    }
+
+    private List<Tag> processTags(List<String> tagNames) {
+        return tagNames.stream().map(tag -> {
+            String normalized = normalized(tag);
+            return tagRepository.findByName(
+                    normalized).orElseGet(() -> tagRepository.save(Tag.builder().name(normalized).build()));
+        }).collect(Collectors.toList());
+    }
 }
