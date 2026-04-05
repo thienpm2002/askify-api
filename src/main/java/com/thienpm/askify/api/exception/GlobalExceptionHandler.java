@@ -6,6 +6,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.validation.BindException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -50,11 +51,24 @@ public class GlobalExceptionHandler {
                 .body(ErrorResponse.of(ErrorCode.VALIDATION_FAILED, message));
     }
 
+    // Exception Valid Request Query Param
+    @ExceptionHandler(BindException.class)
+    public ResponseEntity<ErrorResponse> handleBindException(BindException e) {
+        String message = e.getBindingResult()
+                .getFieldErrors()
+                .stream()
+                .map(FieldError::getDefaultMessage)
+                .collect(Collectors.joining(", "));
+
+        return ResponseEntity.badRequest()
+                .body(ErrorResponse.of(ErrorCode.VALIDATION_FAILED, message));
+    }
+
     // AppException (business)
     @ExceptionHandler(AppException.class)
-    public ResponseEntity<ErrorResponse> handleAppException(AppException ex) {
+    public ResponseEntity<ErrorResponse> handleAppException(AppException e) {
 
-        ErrorResponse errorResponse = ErrorResponse.of(ex.getErrorCode());
+        ErrorResponse errorResponse = ErrorResponse.of(e.getErrorCode());
 
         return ResponseEntity
                 .status(errorResponse.getStatus())
@@ -95,9 +109,9 @@ public class GlobalExceptionHandler {
 
     // Exception chung
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<ErrorResponse> handleException(Exception ex) {
+    public ResponseEntity<ErrorResponse> handleException(Exception e) {
 
-        ErrorResponse errorResponse = ErrorResponse.of(ErrorCode.INTERNAL_SERVER_ERROR, ex.getMessage());
+        ErrorResponse errorResponse = ErrorResponse.of(ErrorCode.INTERNAL_SERVER_ERROR, e.getMessage());
 
         return ResponseEntity
                 .internalServerError()

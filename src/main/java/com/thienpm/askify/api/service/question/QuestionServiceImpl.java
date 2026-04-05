@@ -1,13 +1,24 @@
 package com.thienpm.askify.api.service.question;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.thienpm.askify.api.dto.projection.QuestionFlatDTO;
 import com.thienpm.askify.api.dto.request.CreateQuestionRequest;
+import com.thienpm.askify.api.dto.request.QuestionSearchRequest;
 import com.thienpm.askify.api.dto.request.UpdateQuestionRequest;
+import com.thienpm.askify.api.dto.response.AuthorQuestionResponse;
+import com.thienpm.askify.api.dto.response.PageQuestionResponse;
 import com.thienpm.askify.api.dto.response.QuestionResponse;
 import com.thienpm.askify.api.entity.Question;
 import com.thienpm.askify.api.entity.Tag;
@@ -111,5 +122,61 @@ public class QuestionServiceImpl implements QuestionService {
             return tagRepository.findByName(
                     normalized).orElseGet(() -> tagRepository.save(Tag.builder().name(normalized).build()));
         }).collect(Collectors.toList());
+    }
+
+    @Override
+    public PageQuestionResponse<QuestionResponse> searchQuestionByTitle(QuestionSearchRequest questionSearchRequest) {
+
+        // B1. Lấy danh sách question có thong tin user theo title với pagination và
+        // sorting
+        Sort sort = Sort.by(Sort.Direction.fromString(questionSearchRequest.getSortDir()),
+                questionSearchRequest.getSortBy());
+        Pageable pageable = PageRequest.of(questionSearchRequest.getPage(),
+                questionSearchRequest.getSize(),
+                sort);
+        Page<QuestionFlatDTO> pageResult = questionRepository.searchQuestionByTitle(questionSearchRequest.getKeyword(),
+                pageable);
+        List<Integer> questionIds = pageResult.getContent().stream()
+                .map(QuestionFlatDTO::getId)
+                .collect(Collectors.toList());
+
+        // B2. Batch tags theo questionId
+        Map<Integer, List<String>> tagMap = new HashMap<>();
+        // Nếu không có question nào thì không cần truy vấn tags nữa
+        if (!questionIds.isEmpty()) {
+            List<Object[]> tagsResult = questionRepository.findTagsByQuestionIds(questionIds);
+
+            for (Object[] row : tagsResult) {
+                Integer qId = (Integer) row[0];
+                String tag = (String) row[1];
+
+                tagMap.computeIfAbsent(qId, k -> new ArrayList<>())
+                        .add(tag);
+            }
+        }
+        // B3. Map sang QuestionResponse
+        List<QuestionResponse> content = pageResult.getContent().stream()
+                .map(q -> QuestionResponse.builder()
+                        .id(q.getId())
+                        .title(q.getTitle())
+                        .content(q.getContent())
+                        .voteCount(q.getVoteCount())
+                        .createdAt(q.getCreatedAt())
+                        .author(AuthorQuestionResponse.builder()
+                                .id(q.getUserId())
+                                .userName(q.getUserName())
+                                .avatarUrl(q.getAvatarUrl())
+                                .build())
+                        .tags(tagMap.getOrDefault(q.getId(), List.of()))
+                        .build())
+                .toList();
+        // B4.Trả về kết quả
+        return PageQuestionResponse.<QuestionResponse>builder()
+                .content(content)
+                .page(pageResult.getNumber())
+                .size(pageResult.getSize())
+                .totalElements(pageResult.getTotalElements())
+                .totalPages(pageResult.getTotalPages())
+                .build();
     }
 }

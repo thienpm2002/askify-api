@@ -9,7 +9,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.thienpm.askify.api.dto.request.CreateQuestionRequest;
+import com.thienpm.askify.api.dto.request.QuestionSearchRequest;
 import com.thienpm.askify.api.dto.request.UpdateQuestionRequest;
+import com.thienpm.askify.api.dto.response.PageQuestionResponse;
 import com.thienpm.askify.api.dto.response.QuestionResponse;
 import com.thienpm.askify.api.security.user.CustomUserDetails;
 import com.thienpm.askify.api.service.question.QuestionService;
@@ -20,6 +22,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 
 @RestController
@@ -54,6 +57,12 @@ public class Questioncontroller {
 
         questionService.deleteQuestion(questionId, userDetails);
         return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/search")
+    public ResponseEntity<PageQuestionResponse<QuestionResponse>> getAllQuestionByTitle(
+            @ModelAttribute @Valid QuestionSearchRequest questionSearchRequest) {
+        return ResponseEntity.ok(questionService.searchQuestionByTitle(questionSearchRequest));
     }
 
 }
