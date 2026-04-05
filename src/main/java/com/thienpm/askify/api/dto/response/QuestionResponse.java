@@ -14,6 +14,6 @@ public class QuestionResponse {
     private String content;
     private Integer voteCount;
     private List<String> tags;
-    private AuthorQuestionResponse author;
+    private AuthorResponse author;
     private LocalDateTime createdAt;
 }

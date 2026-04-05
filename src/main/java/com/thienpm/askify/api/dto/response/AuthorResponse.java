@@ -5,7 +5,7 @@ import lombok.Getter;
 
 @Getter
 @Builder
-public class AuthorQuestionResponse {
+public class AuthorResponse {
     private Integer id;
     private String userName;
     private String avatarUrl;

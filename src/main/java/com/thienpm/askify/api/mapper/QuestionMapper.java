@@ -3,7 +3,7 @@ package com.thienpm.askify.api.mapper;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
-import com.thienpm.askify.api.dto.response.AuthorQuestionResponse;
+import com.thienpm.askify.api.dto.response.AuthorResponse;
 import com.thienpm.askify.api.dto.response.QuestionResponse;
 import com.thienpm.askify.api.entity.Question;
 import com.thienpm.askify.api.entity.Tag;
@@ -18,7 +18,7 @@ public interface QuestionMapper {
     @Mapping(target = "id", source = "id")
     @Mapping(target = "userName", source = "userName")
     @Mapping(target = "avatarUrl", source = "avatarUrl")
-    AuthorQuestionResponse toAuthorResponse(User user);
+    AuthorResponse toAuthorResponse(User user);
 
     default String tagToString(Tag tag) {
         return tag.getName();
