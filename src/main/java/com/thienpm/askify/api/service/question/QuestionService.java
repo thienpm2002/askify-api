@@ -1,7 +1,9 @@
 package com.thienpm.askify.api.service.question;
 
 import com.thienpm.askify.api.dto.request.CreateQuestionRequest;
+import com.thienpm.askify.api.dto.request.QuestionSearchRequest;
 import com.thienpm.askify.api.dto.request.UpdateQuestionRequest;
+import com.thienpm.askify.api.dto.response.PageQuestionResponse;
 import com.thienpm.askify.api.dto.response.QuestionResponse;
 import com.thienpm.askify.api.security.user.CustomUserDetails;
 
@@ -14,4 +16,6 @@ public interface QuestionService {
             CustomUserDetails userDetails);
 
     void deleteQuestion(Integer questionId, CustomUserDetails userDetails);
+
+    PageQuestionResponse<QuestionResponse> searchQuestionByTitle(QuestionSearchRequest questionSearchRequest);
 }
