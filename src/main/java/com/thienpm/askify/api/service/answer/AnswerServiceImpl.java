@@ -1,8 +1,10 @@
 package com.thienpm.askify.api.service.answer;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.thienpm.askify.api.dto.request.CreateAnswerRequest;
+import com.thienpm.askify.api.dto.request.UpdateAnswerRequest;
 import com.thienpm.askify.api.dto.response.AnswerResponse;
 import com.thienpm.askify.api.entity.Answer;
 import com.thienpm.askify.api.entity.Question;
@@ -39,6 +41,24 @@ public class AnswerServiceImpl implements AnswerService {
 
         return answerMapper.toResponse(answer);
 
+    }
+
+    @Transactional
+    @Override
+    public AnswerResponse editAnswer(Integer answerId, UpdateAnswerRequest request, CustomUserDetails userDetails) {
+        // Tim answer theo ud
+        Answer answer = answerRepository.findById(answerId)
+                .orElseThrow(() -> new AppException(ErrorCode.ANSWER_NOT_FOUND));
+        // Kiem tra xem user co phai la tac gia cua answer hay khong
+        if (!answer.getUser().getId().equals(userDetails.getUser().getId())) {
+            throw new AppException(ErrorCode.FORBIDDEN);
+        }
+        // Edit answer
+        if (!answer.getContent().equals(request.getContent())) {
+            answer.setContent(request.getContent());
+        }
+
+        return answerMapper.toResponse(answer);
     }
 
 }
