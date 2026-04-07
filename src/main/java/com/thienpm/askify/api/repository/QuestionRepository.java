@@ -5,6 +5,7 @@ import java.util.List;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -39,4 +40,8 @@ public interface QuestionRepository extends JpaRepository<Question, Integer> {
             WHERE q.id IN :ids
             """)
     List<Object[]> findTagsByQuestionIds(@Param("ids") List<Integer> ids);
+
+    @Modifying
+    @Query("UPDATE Question q SET q.voteCount = q.voteCount + :delta WHERE q.id = :id")
+    void incrementVoteCount(@Param("id") Integer id, @Param("delta") int delta);
 }
