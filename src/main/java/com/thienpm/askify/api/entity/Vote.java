@@ -45,7 +45,7 @@ public class Vote {
 
     @Column(name = "target_type", nullable = false)
     @Enumerated(EnumType.STRING)
-    private TargetVoteType target_type;
+    private TargetVoteType targetType;
 
     @Column(name = "vote_type", nullable = false)
     @Enumerated(EnumType.STRING)
