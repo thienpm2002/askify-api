@@ -1,5 +1,7 @@
 package com.thienpm.askify.api.service.user;
 
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -20,8 +22,9 @@ public class UserServiceImpl implements UserService {
     private final FileStorageService fileStorageService;
 
     @Override
+    @Cacheable(value = "userProfile", key = "#userDetails.getUser().getId()")
     public UserProfileResponse getProfile(CustomUserDetails userDetails) {
-
+        System.out.println("Call DB ....");
         return UserProfileResponse.builder()
                 .id(userDetails.getUser().getId())
                 .userName(userDetails.getUser().getUserName())
@@ -31,6 +34,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @CacheEvict(value = "userProfile", key = "#userDetails.getUser().getId()")
     public UserProfileResponse updateProfile(UpdateProfileRequest updateProfileRequest, CustomUserDetails userDetails) {
         User user = userRepository.findById(userDetails.getUser().getId())
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
@@ -50,6 +54,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @CacheEvict(value = "userProfile", key = "#userDetails.getUser().getId()")
     public UserProfileResponse updateAvatar(MultipartFile avatarFile, CustomUserDetails userDetails) {
 
         Integer id = userDetails.getUser().getId();

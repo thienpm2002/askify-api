@@ -83,7 +83,7 @@ public class AuthController {
     @PostMapping("/logout")
     public ResponseEntity<Void> logout(HttpServletResponse response) {
         // Xóa refresh token cookie bằng cách set Max-Age = 0
-        String cookie = "refreshToken=; HttpOnly; Secure; SameSite=Strict; Path=/auth/refresh; Max-Age=0";
+        String cookie = "refreshToken=; HttpOnly; Secure; SameSite=Strict; Path=api/v1/auth; Max-Age=0";
         response.addHeader("Set-Cookie", cookie);
 
         // Clear SecurityContext
@@ -94,7 +94,7 @@ public class AuthController {
 
     private void addRefreshTokenCookie(HttpServletResponse response, String refreshToken) {
         String cookie = String.format(
-                "refreshToken=%s; HttpOnly; Secure; SameSite=Strict; Path=/auth/refresh; Max-Age=%d",
+                "refreshToken=%s; HttpOnly; Secure; SameSite=Strict; Path=api/v1/auth; Max-Age=%d",
                 refreshToken,
                 jwtProperties.getRefreshTokenExpiration());
         response.addHeader("Set-Cookie", cookie);

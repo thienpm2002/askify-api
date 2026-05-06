@@ -26,6 +26,10 @@
     {
       "name": "app.upload.allowed-types",
       "type": "java.util.List"
+    },
+    {
+      "name": "spring.cache.type",
+      "type": "java.lang.String"
     }
   ]
 }

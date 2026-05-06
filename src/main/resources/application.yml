@@ -18,10 +18,18 @@ spring:
       hibernate:
         "[format_sql]": true
 
+  data:
+    redis:
+      host: localhost
+      port: 6379
+
+  cache:
+    type: redis
+
 server:
   port: 8080
   servlet:
-    context-path: /api
+    context-path: /api/v1
 
 app:
   upload:
