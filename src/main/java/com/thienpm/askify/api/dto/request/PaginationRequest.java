@@ -13,7 +13,7 @@ import lombok.Setter;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class QuestionSearchRequest {
+public class PaginationRequest {
     @Size(max = 100)
     private String keyword;
 

@@ -9,9 +9,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.thienpm.askify.api.dto.request.CreateQuestionRequest;
-import com.thienpm.askify.api.dto.request.QuestionSearchRequest;
+import com.thienpm.askify.api.dto.request.PaginationRequest;
 import com.thienpm.askify.api.dto.request.UpdateQuestionRequest;
-import com.thienpm.askify.api.dto.response.PageQuestionResponse;
+import com.thienpm.askify.api.dto.response.AnswerResponse;
+import com.thienpm.askify.api.dto.response.PageResponse;
 import com.thienpm.askify.api.dto.response.QuestionResponse;
 import com.thienpm.askify.api.security.user.CustomUserDetails;
 import com.thienpm.askify.api.service.question.QuestionService;
@@ -60,9 +61,15 @@ public class Questioncontroller {
     }
 
     @GetMapping("/search")
-    public ResponseEntity<PageQuestionResponse<QuestionResponse>> getAllQuestionByTitle(
-            @ModelAttribute @Valid QuestionSearchRequest questionSearchRequest) {
+    public ResponseEntity<PageResponse<QuestionResponse>> getAllQuestionByTitle(
+            @ModelAttribute @Valid PaginationRequest questionSearchRequest) {
         return ResponseEntity.ok(questionService.searchQuestionByTitle(questionSearchRequest));
+    }
+
+    @GetMapping("/{questionId}/answers")
+    public ResponseEntity<PageResponse<AnswerResponse>> getAllAnswersByQuestionId(@PathVariable Integer questionId,
+            @ModelAttribute @Valid PaginationRequest paginationRequest) {
+        return ResponseEntity.ok(questionService.getAllAnswersByQuestionId(questionId, paginationRequest));
     }
 
 }

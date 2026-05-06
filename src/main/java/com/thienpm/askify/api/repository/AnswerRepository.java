@@ -10,5 +10,5 @@ import com.thienpm.askify.api.entity.Answer;
 public interface AnswerRepository extends JpaRepository<Answer, Integer> {
     @Modifying
     @Query("UPDATE Answer a SET a.voteCount = a.voteCount + :delta WHERE a.id = :id")
-    void incrementVoteCount(@Param("id") Integer id, @Param("delta") int delta);
+    void updateVoteCount(@Param("id") Integer id, @Param("delta") int delta);
 }

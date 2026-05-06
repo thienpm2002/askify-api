@@ -24,6 +24,7 @@ public class AnswerServiceImpl implements AnswerService {
     private final QuestionRepository questionRepository;
     private final AnswerMapper answerMapper;
 
+    @Transactional
     @Override
     public AnswerResponse createAnswer(CreateAnswerRequest request, CustomUserDetails userDetails) {
 
@@ -38,6 +39,9 @@ public class AnswerServiceImpl implements AnswerService {
                 .build();
 
         answerRepository.save(answer);
+
+        // Tang answer count len 1
+        questionRepository.updateAnswerCount(question.getId());
 
         return answerMapper.toResponse(answer);
 

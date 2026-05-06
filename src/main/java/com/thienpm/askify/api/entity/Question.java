@@ -46,6 +46,10 @@ public class Question {
     @Column(name = "vote_count", nullable = false)
     private Integer voteCount = 0;
 
+    @Builder.Default
+    @Column(name = "answer_count", nullable = false)
+    private Integer answerCount = 0;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     private User user;

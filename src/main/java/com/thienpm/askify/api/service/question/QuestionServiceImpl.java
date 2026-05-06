@@ -13,12 +13,14 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.thienpm.askify.api.dto.projection.AnswerFlatDTO;
 import com.thienpm.askify.api.dto.projection.QuestionFlatDTO;
 import com.thienpm.askify.api.dto.request.CreateQuestionRequest;
-import com.thienpm.askify.api.dto.request.QuestionSearchRequest;
+import com.thienpm.askify.api.dto.request.PaginationRequest;
 import com.thienpm.askify.api.dto.request.UpdateQuestionRequest;
+import com.thienpm.askify.api.dto.response.AnswerResponse;
 import com.thienpm.askify.api.dto.response.AuthorResponse;
-import com.thienpm.askify.api.dto.response.PageQuestionResponse;
+import com.thienpm.askify.api.dto.response.PageResponse;
 import com.thienpm.askify.api.dto.response.QuestionResponse;
 import com.thienpm.askify.api.entity.Question;
 import com.thienpm.askify.api.entity.Tag;
@@ -126,18 +128,18 @@ public class QuestionServiceImpl implements QuestionService {
         }
 
         @Override
-        public PageQuestionResponse<QuestionResponse> searchQuestionByTitle(
-                        QuestionSearchRequest questionSearchRequest) {
+        public PageResponse<QuestionResponse> searchQuestionByTitle(
+                        PaginationRequest paginationRequest) {
 
                 // B1. Lấy danh sách question có thong tin user theo title với pagination và
                 // sorting
-                Sort sort = Sort.by(Sort.Direction.fromString(questionSearchRequest.getSortDir()),
-                                questionSearchRequest.getSortBy());
-                Pageable pageable = PageRequest.of(questionSearchRequest.getPage(),
-                                questionSearchRequest.getSize(),
+                Sort sort = Sort.by(Sort.Direction.fromString(paginationRequest.getSortDir()),
+                                paginationRequest.getSortBy());
+                Pageable pageable = PageRequest.of(paginationRequest.getPage(),
+                                paginationRequest.getSize(),
                                 sort);
                 Page<QuestionFlatDTO> pageResult = questionRepository.searchQuestionByTitle(
-                                questionSearchRequest.getKeyword(),
+                                paginationRequest.getKeyword(),
                                 pageable);
                 List<Integer> questionIds = pageResult.getContent().stream()
                                 .map(QuestionFlatDTO::getId)
@@ -164,7 +166,9 @@ public class QuestionServiceImpl implements QuestionService {
                                                 .title(q.getTitle())
                                                 .content(q.getContent())
                                                 .voteCount(q.getVoteCount())
+                                                .answerCount(q.getAnswerCount())
                                                 .createdAt(q.getCreatedAt())
+                                                .updatedAt(q.getUpdatedAt())
                                                 .author(AuthorResponse.builder()
                                                                 .id(q.getUserId())
                                                                 .userName(q.getUserName())
@@ -174,7 +178,7 @@ public class QuestionServiceImpl implements QuestionService {
                                                 .build())
                                 .toList();
                 // B4.Trả về kết quả
-                return PageQuestionResponse.<QuestionResponse>builder()
+                return PageResponse.<QuestionResponse>builder()
                                 .content(content)
                                 .page(pageResult.getNumber())
                                 .size(pageResult.getSize())
@@ -182,4 +186,42 @@ public class QuestionServiceImpl implements QuestionService {
                                 .totalPages(pageResult.getTotalPages())
                                 .build();
         }
+
+        @Override
+        public PageResponse<AnswerResponse> getAllAnswersByQuestionId(Integer questionId,
+                        PaginationRequest paginationRequest) {
+                Sort sort = Sort.by(Sort.Direction.fromString(paginationRequest.getSortDir()),
+                                paginationRequest.getSortBy());
+                Pageable pageable = PageRequest.of(paginationRequest.getPage(),
+                                paginationRequest.getSize(),
+                                sort);
+                Page<AnswerFlatDTO> pageResult = questionRepository.getAllAnswersByQuestionId(questionId, pageable);
+
+                // Map sang AnswerResponse
+                List<AnswerResponse> content = pageResult.getContent().stream()
+                                .map(a -> AnswerResponse.builder()
+                                                .id(a.getId())
+                                                .content(a.getContent())
+                                                .voteCount(a.getVoteCount())
+                                                .accepted(a.isAccepted())
+                                                .createdAt(a.getCreatedAt())
+                                                .updatedAt(a.getUpdatedAt())
+                                                .author(AuthorResponse.builder()
+                                                                .id(a.getUserId())
+                                                                .userName(a.getUserName())
+                                                                .avatarUrl(a.getAvatarUrl())
+                                                                .build())
+                                                .questionId(questionId)
+                                                .build())
+                                .toList();
+
+                return PageResponse.<AnswerResponse>builder()
+                                .content(content)
+                                .page(pageResult.getNumber())
+                                .size(pageResult.getSize())
+                                .totalElements(pageResult.getTotalElements())
+                                .totalPages(pageResult.getTotalPages())
+                                .build();
+        }
+
 }

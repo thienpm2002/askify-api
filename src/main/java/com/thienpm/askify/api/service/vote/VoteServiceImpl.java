@@ -59,9 +59,9 @@ public class VoteServiceImpl implements VoteService {
     private void updateVoteCount(Integer targetId, TargetVoteType targetType, int delta) {
 
         if (targetType == TargetVoteType.QUESTION) {
-            questionRepository.incrementVoteCount(targetId, delta);
+            questionRepository.updateVoteCount(targetId, delta);
         } else {
-            answerRepository.incrementVoteCount(targetId, delta);
+            answerRepository.updateVoteCount(targetId, delta);
         }
     }
 }

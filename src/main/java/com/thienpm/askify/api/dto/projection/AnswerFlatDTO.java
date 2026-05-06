@@ -9,12 +9,11 @@ import lombok.NoArgsConstructor;
 @Getter
 @AllArgsConstructor
 @NoArgsConstructor
-public class QuestionFlatDTO {
+public class AnswerFlatDTO {
     private Integer id;
-    private String title;
     private String content;
     private Integer voteCount;
-    private Integer answerCount;
+    private boolean accepted;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     private Integer userId;

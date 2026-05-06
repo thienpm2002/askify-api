@@ -13,7 +13,9 @@ public class QuestionResponse {
     private String title;
     private String content;
     private Integer voteCount;
+    private Integer answerCount;
     private List<String> tags;
     private AuthorResponse author;
     private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
 }

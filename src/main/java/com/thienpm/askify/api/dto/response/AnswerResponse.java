@@ -15,4 +15,5 @@ public class AnswerResponse {
     private Integer questionId;
     private boolean accepted;
     private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
 }
