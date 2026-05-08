@@ -40,6 +40,76 @@ public class QuestionServiceImpl implements QuestionService {
         private final TagRepository tagRepository;
         private final QuestionMapper questionMapper;
 
+        private boolean isAdmin(CustomUserDetails userDetails) {
+                return userDetails.getAuthorities().stream()
+                                .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
+        }
+
+        private boolean isOwner(Integer userId, CustomUserDetails userDetails) {
+                return userId.equals(userDetails.getUser().getId());
+        }
+
+        private String normalized(String tag) {
+                return tag.toLowerCase().trim().replaceAll("\\s+", "-");
+        }
+
+        private List<Tag> processTags(List<String> tagNames) {
+                return tagNames.stream().map(tag -> {
+                        String normalized = normalized(tag);
+                        return tagRepository.findByName(
+                                        normalized)
+                                        .orElseGet(() -> tagRepository.save(Tag.builder().name(normalized).build()));
+                }).collect(Collectors.toList());
+        }
+
+        private PageResponse<QuestionResponse> generatePageResponse(Page<QuestionFlatDTO> pageResult) {
+
+                List<Integer> questionIds = pageResult.getContent().stream()
+                                .map(QuestionFlatDTO::getId)
+                                .collect(Collectors.toList());
+
+                // B2. Batch tags theo questionId
+                Map<Integer, List<String>> tagMap = new HashMap<>();
+                // Nếu không có question nào thì không cần truy vấn tags nữa
+                if (!questionIds.isEmpty()) {
+                        List<Object[]> tagsResult = questionRepository.findTagsByQuestionIds(questionIds);
+
+                        for (Object[] row : tagsResult) {
+                                Integer qId = (Integer) row[0];
+                                String tag = (String) row[1];
+
+                                tagMap.computeIfAbsent(qId, k -> new ArrayList<>())
+                                                .add(tag);
+                        }
+                }
+                // B3. Map sang QuestionResponse
+                List<QuestionResponse> content = pageResult.getContent().stream()
+                                .map(q -> QuestionResponse.builder()
+                                                .id(q.getId())
+                                                .title(q.getTitle())
+                                                .content(q.getContent())
+                                                .voteCount(q.getVoteCount())
+                                                .answerCount(q.getAnswerCount())
+                                                .createdAt(q.getCreatedAt())
+                                                .updatedAt(q.getUpdatedAt())
+                                                .author(AuthorResponse.builder()
+                                                                .id(q.getUserId())
+                                                                .userName(q.getUserName())
+                                                                .avatarUrl(q.getAvatarUrl())
+                                                                .build())
+                                                .tags(tagMap.getOrDefault(q.getId(), List.of()))
+                                                .build())
+                                .toList();
+                // B4.Trả về kết quả
+                return PageResponse.<QuestionResponse>builder()
+                                .content(content)
+                                .page(pageResult.getNumber())
+                                .size(pageResult.getSize())
+                                .totalElements(pageResult.getTotalElements())
+                                .totalPages(pageResult.getTotalPages())
+                                .build();
+        }
+
         @Override
         public QuestionResponse createQuestion(CreateQuestionRequest questionRequest, CustomUserDetails userDetails) {
                 // Xu ly tags
@@ -105,31 +175,8 @@ public class QuestionServiceImpl implements QuestionService {
 
         }
 
-        private boolean isAdmin(CustomUserDetails userDetails) {
-                return userDetails.getAuthorities().stream()
-                                .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
-        }
-
-        private boolean isOwner(Integer userId, CustomUserDetails userDetails) {
-                return userId.equals(userDetails.getUser().getId());
-        }
-
-        private String normalized(String tag) {
-                return tag.toLowerCase().trim().replaceAll("\\s+", "-");
-        }
-
-        private List<Tag> processTags(List<String> tagNames) {
-                return tagNames.stream().map(tag -> {
-                        String normalized = normalized(tag);
-                        return tagRepository.findByName(
-                                        normalized)
-                                        .orElseGet(() -> tagRepository.save(Tag.builder().name(normalized).build()));
-                }).collect(Collectors.toList());
-        }
-
         @Override
-        public PageResponse<QuestionResponse> searchQuestionByTitle(
-                        PaginationRequest paginationRequest) {
+        public PageResponse<QuestionResponse> searchQuestionByTitle(PaginationRequest paginationRequest) {
 
                 // B1. Lấy danh sách question có thong tin user theo title với pagination và
                 // sorting
@@ -141,50 +188,21 @@ public class QuestionServiceImpl implements QuestionService {
                 Page<QuestionFlatDTO> pageResult = questionRepository.searchQuestionByTitle(
                                 paginationRequest.getKeyword(),
                                 pageable);
-                List<Integer> questionIds = pageResult.getContent().stream()
-                                .map(QuestionFlatDTO::getId)
-                                .collect(Collectors.toList());
+                return generatePageResponse(pageResult);
+        }
 
-                // B2. Batch tags theo questionId
-                Map<Integer, List<String>> tagMap = new HashMap<>();
-                // Nếu không có question nào thì không cần truy vấn tags nữa
-                if (!questionIds.isEmpty()) {
-                        List<Object[]> tagsResult = questionRepository.findTagsByQuestionIds(questionIds);
+        public PageResponse<QuestionResponse> getAllQuestions(PaginationRequest paginationRequest) {
 
-                        for (Object[] row : tagsResult) {
-                                Integer qId = (Integer) row[0];
-                                String tag = (String) row[1];
+                // B1. Lấy danh sách question có thong tin user theo title với pagination và
+                // sorting
+                Sort sort = Sort.by(Sort.Direction.fromString(paginationRequest.getSortDir()),
+                                paginationRequest.getSortBy());
+                Pageable pageable = PageRequest.of(paginationRequest.getPage(),
+                                paginationRequest.getSize(),
+                                sort);
+                Page<QuestionFlatDTO> pageResult = questionRepository.getAllQuestions(pageable);
 
-                                tagMap.computeIfAbsent(qId, k -> new ArrayList<>())
-                                                .add(tag);
-                        }
-                }
-                // B3. Map sang QuestionResponse
-                List<QuestionResponse> content = pageResult.getContent().stream()
-                                .map(q -> QuestionResponse.builder()
-                                                .id(q.getId())
-                                                .title(q.getTitle())
-                                                .content(q.getContent())
-                                                .voteCount(q.getVoteCount())
-                                                .answerCount(q.getAnswerCount())
-                                                .createdAt(q.getCreatedAt())
-                                                .updatedAt(q.getUpdatedAt())
-                                                .author(AuthorResponse.builder()
-                                                                .id(q.getUserId())
-                                                                .userName(q.getUserName())
-                                                                .avatarUrl(q.getAvatarUrl())
-                                                                .build())
-                                                .tags(tagMap.getOrDefault(q.getId(), List.of()))
-                                                .build())
-                                .toList();
-                // B4.Trả về kết quả
-                return PageResponse.<QuestionResponse>builder()
-                                .content(content)
-                                .page(pageResult.getNumber())
-                                .size(pageResult.getSize())
-                                .totalElements(pageResult.getTotalElements())
-                                .totalPages(pageResult.getTotalPages())
-                                .build();
+                return generatePageResponse(pageResult);
         }
 
         @Override

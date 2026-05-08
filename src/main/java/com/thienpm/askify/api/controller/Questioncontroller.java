@@ -60,6 +60,12 @@ public class Questioncontroller {
         return ResponseEntity.noContent().build();
     }
 
+    @GetMapping()
+    public ResponseEntity<PageResponse<QuestionResponse>> getAllQuestions(
+            @ModelAttribute @Valid PaginationRequest questionSearchRequest) {
+        return ResponseEntity.ok(questionService.getAllQuestions(questionSearchRequest));
+    }
+
     @GetMapping("/search")
     public ResponseEntity<PageResponse<QuestionResponse>> getAllQuestionByTitle(
             @ModelAttribute @Valid PaginationRequest questionSearchRequest) {

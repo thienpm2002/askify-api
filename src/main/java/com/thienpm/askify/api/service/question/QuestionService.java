@@ -20,5 +20,7 @@ public interface QuestionService {
 
     PageResponse<QuestionResponse> searchQuestionByTitle(PaginationRequest paginationRequest);
 
+    PageResponse<QuestionResponse> getAllQuestions(PaginationRequest paginationRequest);
+
     PageResponse<AnswerResponse> getAllAnswersByQuestionId(Integer questionId, PaginationRequest paginationRequest);
 }

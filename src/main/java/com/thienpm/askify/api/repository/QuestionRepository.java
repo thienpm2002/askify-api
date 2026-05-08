@@ -36,6 +36,26 @@ public interface QuestionRepository extends JpaRepository<Question, Integer> {
             """)
     Page<QuestionFlatDTO> searchQuestionByTitle(@Param("keyword") String keyword, Pageable pageable);
 
+    @Query(value = """
+            SELECT new com.thienpm.askify.api.dto.projection.QuestionFlatDTO(
+                q.id,
+                q.title,
+                q.content,
+                q.voteCount,
+                q.answerCount,
+                q.createdAt,
+                q.updatedAt,
+                u.id,
+                u.userName,
+                u.avatarUrl
+            )
+            FROM Question q
+            JOIN q.user u
+            """, countQuery = """
+            SELECT COUNT(q) FROM Question q
+            """)
+    Page<QuestionFlatDTO> getAllQuestions(Pageable pageable);
+
     @Query("""
             SELECT q.id, t.name
             FROM Question q
