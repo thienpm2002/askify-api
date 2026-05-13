@@ -2,6 +2,8 @@ package com.thienpm.askify.api.exception;
 
 import java.util.stream.Collectors;
 
+import jakarta.servlet.http.HttpServletRequest;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -18,103 +20,159 @@ import com.thienpm.askify.api.enums.ErrorCode;
 
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.JwtException;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
-    // Resource not found
-    @ExceptionHandler(NoResourceFoundException.class)
-    public ResponseEntity<ErrorResponse> handleNotFound(NoResourceFoundException e) {
-        return ResponseEntity
-                .status(404)
-                .body(ErrorResponse.of(ErrorCode.NOT_FOUND));
-    }
+        // Resource not found
+        @ExceptionHandler(NoResourceFoundException.class)
+        public ResponseEntity<ErrorResponse> handleNotFound(
+                        NoResourceFoundException e,
+                        HttpServletRequest request) {
 
-    // Http method sai
-    @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
-    public ResponseEntity<ErrorResponse> handleMethodNotAllowed(HttpRequestMethodNotSupportedException e) {
-        return ResponseEntity
-                .status(404)
-                .body(ErrorResponse.of(ErrorCode.NOT_FOUND));
-    }
+                log.warn("RESOURCE_NOT_FOUND path={}", request.getRequestURI());
 
-    // Exception Valid Request
-    @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<ErrorResponse> handleValidation(MethodArgumentNotValidException e) {
-        String message = e.getBindingResult()
-                .getFieldErrors()
-                .stream()
-                .map(FieldError::getDefaultMessage)
-                .collect(Collectors.joining(", "));
+                return ResponseEntity
+                                .status(404)
+                                .body(ErrorResponse.of(ErrorCode.NOT_FOUND));
+        }
 
-        return ResponseEntity.badRequest()
-                .body(ErrorResponse.of(ErrorCode.VALIDATION_FAILED, message));
-    }
+        // Http method sai
+        @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
+        public ResponseEntity<ErrorResponse> handleMethodNotAllowed(
+                        HttpRequestMethodNotSupportedException e,
+                        HttpServletRequest request) {
 
-    // Exception Valid Request Query Param
-    @ExceptionHandler(BindException.class)
-    public ResponseEntity<ErrorResponse> handleBindException(BindException e) {
-        String message = e.getBindingResult()
-                .getFieldErrors()
-                .stream()
-                .map(FieldError::getDefaultMessage)
-                .collect(Collectors.joining(", "));
+                log.warn("METHOD_NOT_ALLOWED path={} method={}",
+                                request.getRequestURI(),
+                                request.getMethod());
 
-        return ResponseEntity.badRequest()
-                .body(ErrorResponse.of(ErrorCode.VALIDATION_FAILED, message));
-    }
+                return ResponseEntity
+                                .status(404)
+                                .body(ErrorResponse.of(ErrorCode.NOT_FOUND));
+        }
 
-    // AppException (business)
-    @ExceptionHandler(AppException.class)
-    public ResponseEntity<ErrorResponse> handleAppException(AppException e) {
+        // Validation body
+        @ExceptionHandler(MethodArgumentNotValidException.class)
+        public ResponseEntity<ErrorResponse> handleValidation(
+                        MethodArgumentNotValidException e,
+                        HttpServletRequest request) {
 
-        ErrorResponse errorResponse = ErrorResponse.of(e.getErrorCode());
+                String message = e.getBindingResult()
+                                .getFieldErrors()
+                                .stream()
+                                .map(FieldError::getDefaultMessage)
+                                .collect(Collectors.joining(", "));
 
-        return ResponseEntity
-                .status(errorResponse.getStatus())
-                .body(errorResponse);
-    }
+                log.warn("VALIDATION_FAILED path={} message={}",
+                                request.getRequestURI(),
+                                message);
 
-    // Exception Login(email, password)
-    @ExceptionHandler(BadCredentialsException.class)
-    public ResponseEntity<ErrorResponse> handleBadCredentials(BadCredentialsException e) {
-        return ResponseEntity
-                .status(401)
-                .body(ErrorResponse.of(ErrorCode.INVALID_CREDENTIALS));
-    }
+                return ResponseEntity.badRequest()
+                                .body(ErrorResponse.of(ErrorCode.VALIDATION_FAILED, message));
+        }
 
-    // loadUserById không tìm thấy user
-    @ExceptionHandler(UsernameNotFoundException.class)
-    public ResponseEntity<ErrorResponse> handleUsernameNotFound(UsernameNotFoundException e) {
-        return ResponseEntity
-                .status(401)
-                .body(ErrorResponse.of(ErrorCode.INVALID_TOKEN));
-    }
+        // Validation query param
+        @ExceptionHandler(BindException.class)
+        public ResponseEntity<ErrorResponse> handleBindException(
+                        BindException e,
+                        HttpServletRequest request) {
 
-    // Refresh token hết hạn — phải trước JwtException!
-    @ExceptionHandler(ExpiredJwtException.class)
-    public ResponseEntity<ErrorResponse> handleExpiredJwt(ExpiredJwtException e) {
-        return ResponseEntity
-                .status(401)
-                .body(ErrorResponse.of(ErrorCode.TOKEN_EXPIRED));
-    }
+                String message = e.getBindingResult()
+                                .getFieldErrors()
+                                .stream()
+                                .map(FieldError::getDefaultMessage)
+                                .collect(Collectors.joining(", "));
 
-    // Token sai format, sai chữ ký...
-    @ExceptionHandler(JwtException.class)
-    public ResponseEntity<ErrorResponse> handleJwt(JwtException e) {
-        return ResponseEntity
-                .status(401)
-                .body(ErrorResponse.of(ErrorCode.INVALID_TOKEN));
-    }
+                log.warn("BIND_EXCEPTION path={} message={}",
+                                request.getRequestURI(),
+                                message);
 
-    // Exception chung
-    @ExceptionHandler(Exception.class)
-    public ResponseEntity<ErrorResponse> handleException(Exception e) {
+                return ResponseEntity.badRequest()
+                                .body(ErrorResponse.of(ErrorCode.VALIDATION_FAILED, message));
+        }
 
-        ErrorResponse errorResponse = ErrorResponse.of(ErrorCode.INTERNAL_SERVER_ERROR, e.getMessage());
+        // Business exception
+        @ExceptionHandler(AppException.class)
+        public ResponseEntity<ErrorResponse> handleAppException(
+                        AppException e,
+                        HttpServletRequest request) {
 
-        return ResponseEntity
-                .internalServerError()
-                .body(errorResponse);
-    }
+                log.warn("APP_EXCEPTION path={} errorCode={}",
+                                request.getRequestURI(),
+                                e.getErrorCode());
+
+                ErrorResponse errorResponse = ErrorResponse.of(e.getErrorCode());
+
+                return ResponseEntity
+                                .status(errorResponse.getStatus())
+                                .body(errorResponse);
+        }
+
+        // Login fail
+        @ExceptionHandler(BadCredentialsException.class)
+        public ResponseEntity<ErrorResponse> handleBadCredentials(
+                        BadCredentialsException e,
+                        HttpServletRequest request) {
+
+                log.warn("AUTH_LOGIN_FAILED path={}", request.getRequestURI());
+
+                return ResponseEntity
+                                .status(401)
+                                .body(ErrorResponse.of(ErrorCode.INVALID_CREDENTIALS));
+        }
+
+        // User not found
+        @ExceptionHandler(UsernameNotFoundException.class)
+        public ResponseEntity<ErrorResponse> handleUsernameNotFound(
+                        UsernameNotFoundException e,
+                        HttpServletRequest request) {
+
+                log.warn("AUTH_USER_NOT_FOUND path={}", request.getRequestURI());
+
+                return ResponseEntity
+                                .status(401)
+                                .body(ErrorResponse.of(ErrorCode.INVALID_TOKEN));
+        }
+
+        // Token expired
+        @ExceptionHandler(ExpiredJwtException.class)
+        public ResponseEntity<ErrorResponse> handleExpiredJwt(
+                        ExpiredJwtException e,
+                        HttpServletRequest request) {
+
+                log.warn("JWT_EXPIRED path={}", request.getRequestURI());
+
+                return ResponseEntity
+                                .status(401)
+                                .body(ErrorResponse.of(ErrorCode.TOKEN_EXPIRED));
+        }
+
+        // Token invalid
+        @ExceptionHandler(JwtException.class)
+        public ResponseEntity<ErrorResponse> handleJwt(
+                        JwtException e,
+                        HttpServletRequest request) {
+
+                log.warn("JWT_INVALID path={}", request.getRequestURI());
+
+                return ResponseEntity
+                                .status(401)
+                                .body(ErrorResponse.of(ErrorCode.INVALID_TOKEN));
+        }
+
+        // System error
+        @ExceptionHandler(Exception.class)
+        public ResponseEntity<ErrorResponse> handleException(
+                        Exception e,
+                        HttpServletRequest request) {
+
+                log.error("SYSTEM_ERROR path={}", request.getRequestURI(), e);
+
+                return ResponseEntity
+                                .internalServerError()
+                                .body(ErrorResponse.of(ErrorCode.INTERNAL_SERVER_ERROR));
+        }
 }

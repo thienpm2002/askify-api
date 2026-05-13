@@ -36,3 +36,11 @@ app:
     dir: uploads/avatars # Thư mục lưu trữ
     max-size: 2097152 # 2MB in bytes
     allowed-types: image/jpeg,image/png,image/webp
+
+logging:
+  level:
+    root: WARN
+    com.thienpm: INFO
+
+  file:
+    name: logs/app.log

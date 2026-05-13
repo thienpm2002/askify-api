@@ -65,4 +65,19 @@ public class AnswerServiceImpl implements AnswerService {
         return answerMapper.toResponse(answer);
     }
 
+    @Transactional
+    @Override
+    public void deleteAnswer(Integer answerId, CustomUserDetails userDetails) {
+        // Tim answer theo ud
+        Answer answer = answerRepository.findById(answerId)
+                .orElseThrow(() -> new AppException(ErrorCode.ANSWER_NOT_FOUND));
+        // Kiem tra xem user co phai la tac gia cua answer hay khong
+        if (!answer.getUser().getId().equals(userDetails.getUser().getId())) {
+            throw new AppException(ErrorCode.FORBIDDEN);
+        }
+        // Delete answer
+        answerRepository.deleteById(answerId);
+
+    }
+
 }

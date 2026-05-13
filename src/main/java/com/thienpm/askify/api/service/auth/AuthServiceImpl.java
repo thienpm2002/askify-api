@@ -19,7 +19,9 @@ import com.thienpm.askify.api.security.user.CustomUserDetails;
 import com.thienpm.askify.api.security.user.CustomUserDetailsService;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class AuthServiceImpl implements AuthService {
@@ -47,6 +49,8 @@ public class AuthServiceImpl implements AuthService {
 
                 UserDetails userDetails = new CustomUserDetails(user);
 
+                log.info("REGISTER_SUCCESS userId={}", user.getId());
+
                 return AuthResult.builder()
                                 .accessToken(jwtService.generateAccessToken(
                                                 userDetails))
@@ -61,6 +65,8 @@ public class AuthServiceImpl implements AuthService {
                                 new UsernamePasswordAuthenticationToken(loginRequest.getEmail(),
                                                 loginRequest.getPassword()));
                 UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+
+                log.info("LOGIN_SUCCESS userId={}", ((CustomUserDetails) userDetails).getUser().getId());
 
                 return AuthResult.builder()
                                 .accessToken(jwtService.generateAccessToken(
@@ -77,6 +83,8 @@ public class AuthServiceImpl implements AuthService {
 
                 // Load user
                 UserDetails userDetails = userDetailsService.loadUserById(userId);
+
+                log.info("REFRESH_TOKEN_SUCCESS userId={}", userId);
 
                 // Generate cả 2 token mới (refresh token rotation)
                 return AuthResult.builder()

@@ -20,6 +20,6 @@ public class RegisterRequestDTO {
     private String password;
 
     @NotBlank(message = "Username is required")
-    @Size(min = 3, max = 50, message = "Username must be between 3 and 50 characters")
+    @Size(min = 2, max = 30, message = "Username must be between 2 and 30 characters")
     private String userName;
 }

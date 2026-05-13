@@ -1,6 +1,7 @@
 package com.thienpm.askify.api.controller;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -14,6 +15,7 @@ import com.thienpm.askify.api.dto.response.AuthResponse;
 import com.thienpm.askify.api.dto.response.AuthResult;
 import com.thienpm.askify.api.enums.ErrorCode;
 import com.thienpm.askify.api.exception.AppException;
+import com.thienpm.askify.api.security.user.CustomUserDetails;
 import com.thienpm.askify.api.service.auth.AuthService;
 
 import jakarta.servlet.http.Cookie;
@@ -21,7 +23,9 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @RestController
 @RequestMapping("/auth")
 @RequiredArgsConstructor
@@ -33,6 +37,8 @@ public class AuthController {
     public ResponseEntity<AuthResponse> register(
             @RequestBody @Valid RegisterRequestDTO request,
             HttpServletResponse response) {
+
+        log.info("AUTH_REGISTER_REQUEST email=", request.getEmail());
 
         AuthResult authResult = authService.register(request);
 
@@ -47,6 +53,8 @@ public class AuthController {
     public ResponseEntity<AuthResponse> login(
             @RequestBody @Valid LoginRequestDTO request,
             HttpServletResponse response) {
+
+        log.info("AUTH_LOGIN_REQUEST email={}", request.getEmail());
 
         AuthResult authResult = authService.login(request);
 
@@ -81,13 +89,19 @@ public class AuthController {
     }
 
     @PostMapping("/logout")
-    public ResponseEntity<Void> logout(HttpServletResponse response) {
+    public ResponseEntity<Void> logout(HttpServletResponse response,
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
+
+        Integer userId = userDetails.getUser().getId();
+
         // Xóa refresh token cookie bằng cách set Max-Age = 0
         String cookie = "refreshToken=; HttpOnly; Secure; SameSite=Strict; Path=api/v1/auth; Max-Age=0";
         response.addHeader("Set-Cookie", cookie);
 
         // Clear SecurityContext
         SecurityContextHolder.clearContext();
+
+        log.info("AUTH_LOGOUT_SUCCESS userId={}", userId);
 
         return ResponseEntity.noContent().build();
     }

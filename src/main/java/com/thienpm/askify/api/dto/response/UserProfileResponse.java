@@ -1,5 +1,7 @@
 package com.thienpm.askify.api.dto.response;
 
+import com.thienpm.askify.api.enums.Role;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -14,4 +16,5 @@ public class UserProfileResponse {
     private String userName;
     private String email;
     private String avatarUrl;
+    private Role role;
 }

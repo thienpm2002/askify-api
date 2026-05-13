@@ -17,6 +17,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
 @RestController
@@ -30,7 +31,7 @@ public class UserController {
         return ResponseEntity.ok(userService.getProfile(userDetails));
     }
 
-    @PatchMapping("/me")
+    @PutMapping("/me")
     public ResponseEntity<UserProfileResponse> updateProfile(
             @RequestBody @Valid UpdateProfileRequest updateProfileRequest,
             @AuthenticationPrincipal CustomUserDetails userDetails) {

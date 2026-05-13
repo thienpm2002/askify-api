@@ -13,6 +13,7 @@ import lombok.RequiredArgsConstructor;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -36,6 +37,14 @@ public class AnswerController {
             @RequestBody @Valid UpdateAnswerRequest request,
             @AuthenticationPrincipal CustomUserDetails userDetails) {
         return ResponseEntity.ok(answerService.editAnswer(answerId, request, userDetails));
+    }
+
+    @DeleteMapping("/{answerId}")
+    public ResponseEntity<?> editAnswer(@PathVariable Integer answerId,
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
+
+        answerService.deleteAnswer(answerId, userDetails);
+        return ResponseEntity.noContent().build();
     }
 
 }

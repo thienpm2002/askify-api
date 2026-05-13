@@ -9,4 +9,6 @@ public interface AnswerService {
     AnswerResponse createAnswer(CreateAnswerRequest request, CustomUserDetails userDetails);
 
     AnswerResponse editAnswer(Integer answerId, UpdateAnswerRequest request, CustomUserDetails userDetails);
+
+    void deleteAnswer(Integer answerId, CustomUserDetails userDetails);
 }
